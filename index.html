@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CYBERPUNK GAMES</title>
+    <style>
+      /* ==========================================================================
+       CSS VARIABLES & THEME BASE
+       ========================================================================== */
+      :root {
+        --bg-primary: #07090d;
+        --bg-secondary: #0f131c;
+        --bg-card: #151a24;
+        --bg-card-hover: #1c2230;
+
+        /* Dynamic Accent Colors (Updated via JS Random Theme Generator) */
+        --accent-primary: #ccff00; /* Bright Neon Green / Lime */
+        --accent-secondary: #2b61ff; /* Electric Blue */
+        --accent-tertiary: #121620; /* Dark Accent Base */
+
+        --text-primary: #ffffff;
+        --text-secondary: #8f98a8;
+        --text-muted: #576071;
+
+        --card-radius: 28px;
+        --inner-radius: 20px;
+
+        --transition-fast: 0.2s ease;
+        --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        user-select: none;
+      }
+
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow-x: hidden;
+        transition: background-color var(--transition-smooth);
+      }
+
+      /* ==========================================================================
+       PRELOADER STYLES
+       ========================================================================== */
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #030406;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition:
+          opacity 0.6s ease,
+          visibility 0.6s ease;
+      }
+
+      #preloader.fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .loader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .loader-gif {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+      }
+
+      .loader-text {
+        font-size: 14px;
+        letter-spacing: 3px;
+        font-weight: 700;
+        color: var(--accent-primary);
+        text-transform: uppercase;
+        animation: pulseText 1.5s infinite ease-in-out;
+      }
+
+      @keyframes pulseText {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* ==========================================================================
+       MAIN APP CONTAINER & LAYOUT
+       ========================================================================== */
+      .app-container {
+        width: 100%;
+        max-width: 1200px;
+        background-color: var(--bg-secondary);
+        border-radius: var(--card-radius);
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+      }
+
+      /* ==========================================================================
+       LEFT SHOWCASE SECTION
+       ========================================================================== */
+      .showcase-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        min-height: 580px;
+      }
+
+      /* Top Navigation Header */
+      .top-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .brand-logo {
+        display: flex;
+        flex-direction: column;
+        line-height: 1;
+      }
+
+      .brand-logo .brand-top {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: var(--text-primary);
+      }
+
+      .brand-logo .brand-bottom {
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        color: var(--accent-primary);
+        transition: color var(--transition-smooth);
+      }
+
+      .nav-bar {
+        display: flex;
+        align-items: center;
+        background-color: rgba(255, 255, 255, 0.03);
+        padding: 6px;
+        border-radius: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .nav-links {
+        display: flex;
+        list-style: none;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .nav-item {
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+      }
+
+      .nav-item:hover {
+        color: var(--text-primary);
+      }
+
+      .nav-item.active {
+        background-color: var(--accent-primary);
+        color: #000;
+        font-weight: 700;
+        transition: background-color var(--transition-smooth);
+      }
+
+      .header-user-status {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .wallet-chip {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-primary);
+      }
+
+      .wallet-icon {
+        width: 14px;
+        height: 14px;
+        fill: var(--accent-primary);
+        transition: fill var(--transition-smooth);
+      }
+
+      .flag-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      /* Central Showcase Area */
+      .showcase-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: center;
+        position: relative;
+        flex-grow: 1;
+      }
+
+      /* Left Image Showcase Container */
+      .featured-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 380px;
+        border-radius: var(--inner-radius);
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+
+      .featured-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        transition:
+          opacity 0.35s ease,
+          transform 0.35s ease,
+          filter 0.35s ease;
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .featured-image.changing {
+        opacity: 0;
+        transform: scale(1.05);
+        filter: blur(8px);
+      }
+
+      /* Overlay gradient to blend bottom of main image */
+      .featured-image-wrapper::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 40%;
+        background: linear-gradient(to top, var(--bg-secondary), transparent);
+      }
+
+      /* Showcase Content Details */
+      .showcase-details {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-right: 10px;
+        z-index: 2;
+      }
+
+      .showcase-title {
+        font-size: 34px;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: 1px;
+        color: var(--text-primary);
+        text-transform: uppercase;
+      }
+
+      .showcase-title span {
+        color: var(--accent-primary);
+        transition: color var(--transition-smooth);
+        display: block;
+      }
+
+      .showcase-description {
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        max-width: 320px;
+      }
+
+      /* Avatar Preview Row */
+      .previews-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      .avatar-preview {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        object-fit: cover;
+        transition:
+          transform var(--transition-fast),
+          border-color var(--transition-smooth);
+        cursor: pointer;
+      }
+
+      .avatar-preview:hover {
+        transform: translateY(-3px) scale(1.05);
+        border-color: var(--accent-primary);
+      }
+
+      /* Bottom Floating Card: Game Genre / Theme Generator */
+      .bottom-row {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        margin-top: 20px;
+      }
+
+      .genre-card-button {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--inner-radius);
+        padding: 16px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all var(--transition-smooth);
+        min-width: 140px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .genre-card-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          circle at center,
+          var(--accent-primary) 0%,
+          transparent 70%
+        );
+        opacity: 0;
+        transition: opacity var(--transition-fast);
+        pointer-events: none;
+      }
+
+      .genre-card-button:hover {
+        transform: translateY(-4px);
+        border-color: var(--accent-primary);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+      }
+
+      .genre-card-button:hover::before {
+        opacity: 0.1;
+      }
+
+      .genre-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: 0.5px;
+      }
+
+      .genre-icon {
+        width: 28px;
+        height: 28px;
+        fill: var(--accent-primary);
+        transition:
+          fill var(--transition-smooth),
+          transform var(--transition-fast);
+      }
+
+      .genre-card-button:hover .genre-icon {
+        transform: rotate(15deg) scale(1.1);
+      }
+
+      .genre-subtitle {
+        font-size: 11px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      /* ==========================================================================
+       RIGHT PANEL: IMAGE SELECTION GALLERY
+       ========================================================================== */
+      .selection-panel {
+        background-color: var(--bg-card);
+        border-radius: var(--inner-radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        max-height: 580px;
+        overflow-y: auto;
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .panel-title {
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-primary);
+      }
+
+      .panel-subtitle {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      /* Stacked Cards Container */
+      .gallery-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 4px;
+      }
+
+      /* Scrollbar styling for the scrollable selection panel */
+      .selection-panel::-webkit-scrollbar {
+        width: 4px;
+      }
+      .selection-panel::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+      }
+      .selection-panel::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 4px;
+      }
+
+      /* Individual Image Card Item */
+      .selection-card {
+        position: relative;
+        border-radius: 18px;
+        height: 105px;
+        overflow: hidden;
+        cursor: pointer;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition:
+          transform var(--transition-fast),
+          border-color var(--transition-smooth),
+          box-shadow var(--transition-smooth);
+        border: 2px solid transparent;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .selection-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 0, 0, 0.85) 0%,
+          rgba(0, 0, 0, 0.4) 100%
+        );
+        z-index: 1;
+        transition: opacity var(--transition-fast);
+      }
+
+      .selection-card:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Active Selected Card Styling */
+      .selection-card.selected {
+        border-color: var(--accent-primary);
+        box-shadow:
+          0 0 20px rgba(0, 0, 0, 0.6),
+          inset 0 0 10px rgba(255, 255, 255, 0.1);
+      }
+
+      .selection-card.selected::before {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 0, 0, 0.7) 0%,
+          rgba(0, 0, 0, 0.2) 100%
+        );
+      }
+
+      .card-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%;
+      }
+
+      .card-title-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .card-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .card-tag {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent-primary);
+        margin-top: 2px;
+        transition: color var(--transition-smooth);
+      }
+
+      .card-details {
+        position: relative;
+        z-index: 2;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.6);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .card-badge-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+
+      .card-badge-icon svg {
+        width: 14px;
+        height: 14px;
+        fill: var(--text-primary);
+      }
+
+      /* Color Custom Variations for Cards matching reference */
+      .card-style-1 {
+        background-color: #1d2516;
+      }
+      .card-style-2 {
+        background-color: #121c33;
+      }
+      .card-style-3 {
+        background-color: #171821;
+      }
+
+      /* Expand / Collapse Button */
+      .expand-button-wrapper {
+        margin-top: 16px;
+        position: sticky;
+        bottom: 0;
+      }
+
+      .expand-btn {
+        width: 100%;
+        background-color: var(--accent-primary);
+        color: #000;
+        border: none;
+        border-radius: 30px;
+        padding: 14px 20px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all var(--transition-smooth);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .expand-btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .expand-btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform var(--transition-smooth);
+      }
+
+      .expand-btn.active .btn-icon {
+        transform: rotate(180deg);
+      }
+
+      /* ==========================================================================
+       RESPONSIVE DESIGN ADAPTATIONS
+       ========================================================================== */
+      @media (max-width: 992px) {
+        .app-container {
+          grid-template-columns: 1fr;
+          max-width: 650px;
+        }
+        .selection-panel {
+          margin-top: 10px;
+        }
+        .selection-panel {
+          max-height: 520px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        .app-container {
+          padding: 16px;
+          border-radius: 20px;
+        }
+        .top-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+        }
+        .header-user-status {
+          width: 100%;
+          justify-content: space-between;
+        }
+        .showcase-body {
+          grid-template-columns: 1fr;
+        }
+        .featured-image-wrapper {
+          height: 280px;
+        }
+        .showcase-title {
+          font-size: 26px;
+        }
+        .bottom-row {
+          justify-content: center;
+        }
+        .genre-card-button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ==========================================================================
+       RANDOM GIF PRELOADER
+       ========================================================================== -->
+    <div id="preloader">
+      <div class="loader-content">
+        <!-- Image source populated dynamically via JavaScript -->
+        <img id="preloaderGif" class="loader-gif" alt="Loading Animation" />
+        <div class="loader-text">INITIALIZING SYSTEM...</div>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+       MAIN CYBERPUNK APP CONTAINER
+       ========================================================================== -->
+    <div class="app-container">
+      <!-- LEFT SECTION: NAVIGATION & FEATURED SHOWCASE -->
+      <main class="showcase-section">
+        <!-- Top Navigation Header -->
+        <header class="top-header">
+          <div class="brand-logo">
+            <span class="brand-top">CYBERPUNK</span>
+            <span class="brand-bottom">GAMES</span>
+          </div>
+
+          <nav class="nav-bar">
+            <ul class="nav-links">
+              <li><a class="nav-item active" href="#shop">Shop</a></li>
+              <li><a class="nav-item" href="#community">Community</a></li>
+              <li><a class="nav-item" href="#library">Library</a></li>
+              <li><a class="nav-item" href="#news">News</a></li>
+              <!-- Reserved space for future nav links -->
+            </ul>
+          </nav>
+
+          <div class="header-user-status">
+            <div class="wallet-chip">
+              <svg class="wallet-icon" viewBox="0 0 24 24">
+                <path
+                  d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+                />
+              </svg>
+              <span>$2,000.015</span>
+            </div>
+            <svg class="flag-icon" viewBox="0 0 640 480">
+              <path fill="#012169" d="M0 0h640v480H0z" />
+              <path
+                fill="#FFF"
+                d="m75 0 245 181L565 0h75v55L395 240l245 185v55h-75L320 299 75 480H0v-55l245-185L0 55V0h75z"
+              />
+              <path
+                fill="#C8102E"
+                d="m424 288 216 162v30h-40L376 318l48-30zM565 0l-221 165 24 35L640 20V0h-75zM0 425l216-162 24 35L16 480H0v-55zM192 192 0 48v-30h40l200 150-48 24z"
+              />
+              <path fill="#FFF" d="M240 0h160v480H240zM0 160h640v160H0z" />
+              <path fill="#C8102E" d="M267 0h106v480H267zM0 187h640v106H0z" />
+            </svg>
+          </div>
+        </header>
+
+        <!-- Main Showcase Body -->
+        <div class="showcase-body">
+          <!-- Left Featured Image Container -->
+          <div class="featured-image-wrapper">
+            <img
+              id="mainFeaturedImg"
+              class="featured-image"
+              src=""
+              alt="Featured Cyberpunk Character"
+            />
+          </div>
+
+          <!-- Right Content Details -->
+          <div class="showcase-details">
+            <h1 class="showcase-title">ULTIMATE <span>NINJA WARS</span></h1>
+            <p class="showcase-description">
+              Prepare for an intense clash of strategy in Ninja Empires, an
+              online real-time strategy game that combines the essence of Clash
+              with the stealthy world of ninjas!
+            </p>
+
+            <!-- Avatar Previews -->
+            <div class="previews-row">
+              <img
+                class="avatar-preview"
+                id="avatar1"
+                src=""
+                alt="Character Avatar 1"
+              />
+              <img
+                class="avatar-preview"
+                id="avatar2"
+                src=""
+                alt="Character Avatar 2"
+              />
+              <img
+                class="avatar-preview"
+                id="avatar3"
+                src=""
+                alt="Character Avatar 3"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Floating Genre / Theme Generator Button -->
+        <div class="bottom-row">
+          <button
+            id="themeRandomizerBtn"
+            class="genre-card-button"
+            title="Click to randomize UI Theme"
+          >
+            <span class="genre-title">Game Genre</span>
+            <svg class="genre-icon" viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"
+              />
+            </svg>
+            <span class="genre-subtitle">Strategy / Theme</span>
+          </button>
+        </div>
+      </main>
+
+      <!-- RIGHT SECTION: IMAGE SELECTION GALLERY PANEL -->
+      <aside class="selection-panel">
+        <div>
+          <div class="panel-header">
+            <h2 class="panel-title">GALLERY</h2>
+            <span class="panel-subtitle" id="selectionCount"
+              >3 games selected</span
+            >
+          </div>
+
+          <!-- Stacked Dynamic Gallery Container -->
+          <div class="gallery-container" id="galleryContainer">
+            <!-- Selection items will be populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Expand/Collapse Gallery Button -->
+        <div class="expand-button-wrapper">
+          <button class="expand-btn" id="expandToggleBtn">
+            <span id="expandBtnText">Show More</span>
+            <div class="btn-icon">
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                <path
+                  d="M1 1L5 5L9 1"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ==========================================================================
+       JAVASCRIPT LOGIC
+       ========================================================================== -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        /* ==========================================================================
+         1. RANDOM GIF PRELOADER DATA & LOGIC
+         ========================================================================== */
+        // Inline Data-URIs (SVG Animations) so the code works out-of-the-box without external images.
+        // You can replace these strings with real file paths: e.g. "assets/gifs/loading1.gif"
+        const preloadGifs = [
+          "img/1.gif",
+          "img/2.gif",
+          "img/3.gif",
+          "img/4.gif",
+        ];
+
+        function initPreloader() {
+          const preloaderEl = document.getElementById("preloader");
+          const preloaderGifEl = document.getElementById("preloaderGif");
+
+          // Pick a random GIF from the array
+          const randomGif =
+            preloadGifs[Math.floor(Math.random() * preloadGifs.length)];
+          preloaderGifEl.src = randomGif;
+
+          // Hide preloader smoothly after page loads
+          setTimeout(() => {
+            preloaderEl.classList.add("fade-out");
+          }, 800);
+        }
+
+        /* ==========================================================================
+         2. GAME / IMAGE DATA ARRAY
+         ========================================================================== */
+        // High quality generated SVG visuals representing futuristic characters/games
+        const gamesData = [
+          {
+            id: 1,
+            title: "ANBU WARS",
+            category: "CYBERPUNK",
+            release: "2024",
+            creator: "Ubisoft Montreal",
+            image: "img/0.png",
+            icon: "<svg viewBox='0 0 24 24'><path d='M12 2L2 19h20L12 2zm0 3l7.5 13h-15L12 5z'/></svg>",
+          },
+          {
+            id: 2,
+            title: "ATTACK OF THE TITANS",
+            category: "LIMITED EDITION",
+            release: "2025",
+            creator: "EA SPORTS",
+            image: "img/1.png",
+            icon: "<svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/></svg>",
+          },
+          {
+            id: 3,
+            title: "NARUTO",
+            category: "CYBERPUNK",
+            release: "2024",
+            creator: "Bandai Namco Europe",
+            image: "img/2.png",
+            icon: "<svg viewBox='0 0 24 24'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/></svg>",
+          },
+          {
+            id: 4,
+            title: "NEON PROTOCOL",
+            category: "EXPANSION",
+            release: "2026",
+            creator: "CD Projekt Red",
+            image: "img/3.png",
+            icon: "<svg viewBox='0 0 24 24'><path d='M12 2L2 19h20L12 2z'/></svg>",
+          },
+          {
+            id: 5,
+            title: "SHADOW SHINOBI",
+            category: "DELUXE EDITION",
+            release: "2025",
+            creator: "Kona Games",
+            image: "img/4.png",
+            icon: "<svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/></svg>",
+          },
+          {
+            id: 6,
+            title: "MECHA RHINO",
+            category: "ULTIMATE",
+            release: "2024",
+            creator: "Epic Games",
+            image: "img/5.png",
+            icon: "<svg viewBox='0 0 24 24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z'/></svg>",
+          },
+          {
+            id: 7,
+            title: "CYBER HUNTER",
+            category: "BATTLE ROYALE",
+            release: "2025",
+            creator: "Tencent Games",
+            image: "img/6.png",
+            icon: "<svg viewBox='0 0 24 24'><path d='M12 2L2 19h20L12 2zm0 3l7.5 13h-15L12 5z'/></svg>",
+          },
+          {
+            id: 8,
+            title: "NEON CITY RACERS",
+            category: "RACING",
+            release: "2026",
+            creator: "Codemasters",
+            image: "img/2.jpg",
+            icon: "<svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/></svg>",
+          },
+          {
+            id: 9,
+            title: "ROBO ASSASSINS",
+            category: "STEALTH",
+            release: "2024",
+            creator: "Rockstar Games",
+            image: "img/3.jpg",
+            icon: "<svg viewBox='0 0 24 24'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/></svg>",
+          },
+          {
+            id: 10,
+            title: "VIRTUAL NINJA",
+            category: "ADVENTURE",
+            release: "2025",
+            creator: "Square Enix",
+            image: "img/4.jpg",
+            icon: "<svg viewBox='0 0 24 24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z'/></svg>",
+          },
+          {
+            id: 11,
+            title: "MECH WARRIORS",
+            category: "STRATEGY",
+            release: "2026",
+            creator: "Paradox Interactive",
+            image: "img/2.jpeg",
+            icon: "<svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/></svg>",
+          },
+          {
+            id: 12,
+            title: "CYBERPUNK LEGENDS",
+            category: "LEGENDS",
+            release: "2024",
+            creator: "Bethesda Softworks",
+            image: "img/7.png",
+            icon: "<svg viewBox='0 0 24 24'><path d='M12 2L2 19h20L12 2zm0 3l7.5 13h-15L12 5z'/></svg>",
+          },
+        ];
+
+        let selectedGameId = gamesData[0].id;
+        let isExpanded = false;
+
+        /* ==========================================================================
+         3. IMAGE SELECTION & GALLERY RENDERING
+         ========================================================================== */
+        const galleryContainer = document.getElementById("galleryContainer");
+        const mainFeaturedImg = document.getElementById("mainFeaturedImg");
+        const avatar1 = document.getElementById("avatar1");
+        const avatar2 = document.getElementById("avatar2");
+        const avatar3 = document.getElementById("avatar3");
+
+        function renderGallery() {
+          galleryContainer.innerHTML = "";
+
+          gamesData.forEach((game, index) => {
+            const card = document.createElement("div");
+            card.className = `selection-card card-style-${(index % 3) + 1} ${game.id === selectedGameId ? "selected" : ""}`;
+            card.style.backgroundImage = `url("${game.image}")`;
+
+            card.innerHTML = `
+            <div class="card-content">
+              <div class="card-title-group">
+                <span class="card-title">${game.title}</span>
+                <span class="card-tag">${game.category}</span>
+              </div>
+              <div class="card-badge-icon">
+                ${game.icon}
+              </div>
+            </div>
+            <div class="card-details">
+              <span>Release: ${game.release}</span>
+              <span>Creator: ${game.creator}</span>
+            </div>
+          `;
+
+            card.addEventListener("click", () => selectGame(game));
+            galleryContainer.appendChild(card);
+          });
+
+          updateSelectionCount();
+        }
+
+        function selectGame(game) {
+          if (selectedGameId === game.id) return;
+          selectedGameId = game.id;
+
+          // Smooth image transition with fade and blur scale
+          mainFeaturedImg.classList.add("changing");
+
+          setTimeout(() => {
+            mainFeaturedImg.src = game.image;
+            mainFeaturedImg.classList.remove("changing");
+          }, 200);
+
+          // Update card selection states
+          renderGallery();
+        }
+
+        function updateSelectionCount() {
+          const countText = document.getElementById("selectionCount");
+          countText.textContent = `${gamesData.length} games selected`;
+        }
+
+        // Initial setup for showcase images
+        function initShowcaseImages() {
+          mainFeaturedImg.src = gamesData[0].image;
+          avatar1.src = gamesData[0].image;
+          avatar2.src = gamesData[1].image;
+          avatar3.src = gamesData[2].image;
+        }
+
+        /* ==========================================================================
+         4. SHOW MORE / SHOW LESS PANEL SCROLL LOGIC
+         ========================================================================== */
+        const expandToggleBtn = document.getElementById("expandToggleBtn");
+        const expandBtnText = document.getElementById("expandBtnText");
+        const selectionPanel = document.querySelector(".selection-panel");
+
+        expandToggleBtn.addEventListener("click", () => {
+          isExpanded = !isExpanded;
+
+          if (isExpanded) {
+            expandToggleBtn.classList.add("active");
+            expandBtnText.textContent = "Show Less";
+            // Scroll the selection panel down to reveal the remaining cards
+            selectionPanel.scrollTo({
+              top: selectionPanel.scrollHeight,
+              behavior: "smooth",
+            });
+          } else {
+            expandToggleBtn.classList.remove("active");
+            expandBtnText.textContent = "Show More";
+            selectionPanel.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+
+        /* ==========================================================================
+         5. RANDOM THEME GENERATOR LOGIC
+         ========================================================================== */
+        const themePalettes = [
+          {
+            name: "Neon Green / Blue",
+            primary: "#ccff00",
+            secondary: "#2b61ff",
+            bgPrimary: "#07090d",
+            bgSecondary: "#0f131c",
+          },
+          {
+            name: "Electric Blue / Cyan",
+            primary: "#00f0ff",
+            secondary: "#7000ff",
+            bgPrimary: "#050b14",
+            bgSecondary: "#0a1526",
+          },
+          {
+            name: "Cyber Purple / Hot Pink",
+            primary: "#ff007f",
+            secondary: "#9d00ff",
+            bgPrimary: "#0d0514",
+            bgSecondary: "#170a24",
+          },
+          {
+            name: "Crimson Red / Orange",
+            primary: "#ff3300",
+            secondary: "#ffaa00",
+            bgPrimary: "#120606",
+            bgSecondary: "#1f0b0b",
+          },
+          {
+            name: "Lime / Aqua",
+            primary: "#10b981",
+            secondary: "#06b6d4",
+            bgPrimary: "#04120e",
+            bgSecondary: "#0a211b",
+          },
+        ];
+
+        const themeRandomizerBtn =
+          document.getElementById("themeRandomizerBtn");
+
+        function applyRandomTheme() {
+          // Pick random palette
+          const randomIndex = Math.floor(Math.random() * themePalettes.length);
+          const palette = themePalettes[randomIndex];
+
+          // Update CSS Variables dynamically
+          document.documentElement.style.setProperty(
+            "--accent-primary",
+            palette.primary,
+          );
+          document.documentElement.style.setProperty(
+            "--accent-secondary",
+            palette.secondary,
+          );
+          document.documentElement.style.setProperty(
+            "--bg-primary",
+            palette.bgPrimary,
+          );
+          document.documentElement.style.setProperty(
+            "--bg-secondary",
+            palette.bgSecondary,
+          );
+        }
+
+        themeRandomizerBtn.addEventListener("click", applyRandomTheme);
+
+        /* ==========================================================================
+         INITIALIZATION
+         ========================================================================== */
+        initPreloader();
+        initShowcaseImages();
+        renderGallery();
+      });
+    </script>
+  </body>
+</html>
