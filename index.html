@@ -118,12 +118,44 @@
         background-color: var(--bg-secondary);
         border-radius: var(--card-radius);
         padding: 24px;
-        display: grid;
-        grid-template-columns: 1fr 360px;
-        gap: 24px;
+        display: flex;
+        flex-direction: column;
         box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.05);
         position: relative;
+      }
+
+      /* ==========================================================================
+       VIEW SWITCHING (SHOP <-> LIBRARY)
+       ========================================================================== */
+      .shop-view {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+      }
+
+      .shop-view.hidden {
+        display: none;
+      }
+
+      .library-view {
+        display: none;
+      }
+
+      .library-view.active {
+        display: block;
+        animation: viewFadeIn 0.4s ease;
+      }
+
+      @keyframes viewFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       /* ==========================================================================
@@ -287,6 +319,32 @@
         width: 100%;
         height: 40%;
         background: linear-gradient(to top, var(--bg-secondary), transparent);
+      }
+
+      /* Mobile quick-switch strip (populated via JS, desktop hides it) */
+      .thumb-strip {
+        display: none;
+      }
+
+      .thumb-chip {
+        flex: 0 0 auto;
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background-size: cover;
+        background-position: center;
+        cursor: pointer;
+        padding: 0;
+        transition:
+          border-color var(--transition-fast),
+          transform var(--transition-fast);
+      }
+
+      .thumb-chip.selected {
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
       }
 
       /* Showcase Content Details */
@@ -655,18 +713,727 @@
       }
 
       /* ==========================================================================
+       LIBRARY VIEW — VIDEO / GIF MEDIA GRID
+       ========================================================================== */
+      /* Hero Banner Carousel */
+      .lib-banner {
+        position: relative;
+        border-radius: var(--inner-radius);
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        min-height: 190px;
+        display: flex;
+        align-items: center;
+        padding: 32px;
+        margin-bottom: 24px;
+      }
+
+      .lib-banner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          120deg,
+          var(--accent-secondary) -30%,
+          transparent 55%
+        );
+        opacity: 0.35;
+        transition: background var(--transition-smooth);
+      }
+
+      .lib-banner::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -60px;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        border: 2px dashed rgba(255, 255, 255, 0.12);
+        animation: spinSlow 30s linear infinite;
+        pointer-events: none;
+      }
+
+      @keyframes spinSlow {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .lib-slide {
+        display: none;
+        position: relative;
+        z-index: 2;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 520px;
+      }
+
+      .lib-slide.active {
+        display: flex;
+        animation: viewFadeIn 0.5s ease;
+      }
+
+      .lib-slide-tag {
+        font-size: 11px;
+        letter-spacing: 2px;
+        font-weight: 800;
+        color: var(--accent-primary);
+        text-transform: uppercase;
+      }
+
+      .lib-slide-title {
+        font-size: 32px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        line-height: 1.1;
+      }
+
+      .lib-slide-sub {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        max-width: 420px;
+      }
+
+      .lib-slide-cta {
+        margin-top: 8px;
+        align-self: flex-start;
+        background-color: var(--accent-primary);
+        color: #000;
+        border: none;
+        border-radius: 30px;
+        padding: 10px 22px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .lib-slide-cta:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+      }
+
+      .lib-banner-dots {
+        position: absolute;
+        bottom: 16px;
+        left: 32px;
+        display: flex;
+        gap: 8px;
+        z-index: 3;
+      }
+
+      .lib-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        border: none;
+        padding: 0;
+      }
+
+      .lib-dot.active {
+        width: 26px;
+        background: var(--accent-primary);
+      }
+
+      /* Section Header */
+      .lib-section-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .lib-section-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .lib-section-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: var(--accent-primary);
+      }
+
+      .lib-section-title {
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .lib-section-count {
+        margin-left: auto;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 8px 16px;
+        border-radius: 20px;
+        white-space: nowrap;
+      }
+
+      .lib-section-count b {
+        color: var(--accent-primary);
+      }
+
+      /* Filter Chips */
+      .lib-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .lib-chip {
+        padding: 7px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .lib-chip:hover {
+        color: var(--text-primary);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .lib-chip.active {
+        background: var(--accent-primary);
+        color: #000;
+        border-color: var(--accent-primary);
+      }
+
+      /* Sort / Filter Toolbar */
+      .lib-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin: 16px 0 18px;
+        padding: 14px 16px;
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+      }
+
+      .lib-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .lib-toolbar-heading {
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+
+      .lib-sort-chip {
+        font-size: 11px;
+        font-weight: 800;
+        color: #000;
+        background-color: var(--accent-primary);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: filter var(--transition-fast);
+      }
+
+      .lib-sort-chip:hover {
+        filter: brightness(1.1);
+      }
+
+      .lib-toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .lib-sort-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 700;
+      }
+
+      .lib-sort-btn {
+        padding: 7px 13px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        background: transparent;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .lib-sort-btn:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .lib-sort-btn.active {
+        color: var(--accent-primary);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .lib-filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 15px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        transition: all var(--transition-fast);
+      }
+
+      .lib-filter-btn.active {
+        background: var(--accent-primary);
+        color: #000;
+        border-color: var(--accent-primary);
+      }
+
+      .lib-filter-btn svg {
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
+      }
+
+      /* Media Card Grid */
+      .lib-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+      }
+
+      .lib-card {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 18px;
+        overflow: hidden;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        transition:
+          transform var(--transition-fast),
+          border-color var(--transition-smooth),
+          box-shadow var(--transition-smooth);
+      }
+
+      .lib-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-primary);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+      }
+
+      .lib-thumb {
+        position: relative;
+        height: 150px;
+        overflow: hidden;
+        background-color: #0b0e15;
+      }
+
+      .lib-media {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform var(--transition-smooth);
+      }
+
+      .lib-card:hover .lib-media {
+        transform: scale(1.06);
+      }
+
+      .lib-badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        gap: 6px;
+        z-index: 2;
+      }
+
+      .lib-badge {
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        padding: 4px 8px;
+        border-radius: 6px;
+        color: #fff;
+      }
+
+      .lib-badge.hot {
+        background-color: #ff2d55;
+        box-shadow: 0 4px 12px rgba(255, 45, 85, 0.4);
+      }
+
+      .lib-badge.love {
+        background-color: var(--accent-secondary);
+      }
+
+      .lib-type-chip {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        z-index: 2;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: var(--text-primary);
+        background: rgba(0, 0, 0, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(4px);
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .lib-type-chip svg {
+        width: 8px;
+        height: 8px;
+        fill: var(--accent-primary);
+      }
+
+      .lib-body {
+        padding: 14px 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+      }
+
+      .lib-title {
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .lib-creator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .lib-avatar {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        flex-shrink: 0;
+      }
+
+      .lib-username {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .lib-rating {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 800;
+        color: #f5b50a;
+        white-space: nowrap;
+      }
+
+      .lib-rating svg {
+        width: 11px;
+        height: 11px;
+        fill: #f5b50a;
+        flex-shrink: 0;
+      }
+
+      .lib-rating span {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 10px;
+      }
+
+      .lib-stats {
+        display: flex;
+        gap: 14px;
+        padding-bottom: 4px;
+      }
+
+      .lib-stat {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      .lib-stat b {
+        color: var(--text-primary);
+        font-weight: 800;
+      }
+
+      .lib-dot-online {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: #22c55e;
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+        animation: pulseDot 1.8s infinite;
+        flex-shrink: 0;
+      }
+
+      .lib-dot-visits {
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+        background-color: #f5b50a;
+        transform: rotate(45deg);
+        flex-shrink: 0;
+      }
+
+      @keyframes pulseDot {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+
+      .lib-cta {
+        margin-top: auto;
+        width: 100%;
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-secondary);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 1.2px;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-transform: uppercase;
+      }
+
+      .lib-cta:hover {
+        background-color: var(--accent-primary);
+        color: #000;
+        border-color: var(--accent-primary);
+      }
+
+      .lib-card:first-child .lib-cta {
+        background-color: var(--accent-primary);
+        color: #000;
+        border-color: var(--accent-primary);
+      }
+
+      .lib-empty {
+        display: none;
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+        font-weight: 700;
+        letter-spacing: 2px;
+        font-size: 13px;
+      }
+
+      .lib-empty.visible {
+        display: block;
+      }
+
+      /* Media Lightbox */
+      .lib-lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(3, 4, 6, 0.88);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .lib-lightbox.open {
+        display: flex;
+        animation: viewFadeIn 0.25s ease;
+      }
+
+      .lib-lightbox-box {
+        width: 100%;
+        max-width: 860px;
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
+      }
+
+      .lib-lightbox-media {
+        width: 100%;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .lib-lightbox-media img,
+      .lib-lightbox-media video {
+        width: 100%;
+        max-height: 62vh;
+        object-fit: contain;
+        display: block;
+      }
+
+      .lib-lightbox-info {
+        padding: 18px 22px;
+      }
+
+      .lib-lightbox-title {
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      .lib-lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 24px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-fast);
+        z-index: 2;
+      }
+
+      .lib-lightbox-close:hover {
+        background-color: #ff2d55;
+        border-color: #ff2d55;
+      }
+
+      /* Toast Notification */
+      .lib-toast {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translate(-50%, 20px);
+        background-color: var(--bg-card);
+        border: 1px solid var(--accent-primary);
+        color: var(--text-primary);
+        padding: 12px 22px;
+        border-radius: 14px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .lib-toast.visible {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      /* ==========================================================================
        RESPONSIVE DESIGN ADAPTATIONS
        ========================================================================== */
+      @media (max-width: 1100px) {
+        .lib-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
       @media (max-width: 992px) {
-        .app-container {
+        .shop-view {
           grid-template-columns: 1fr;
           max-width: 650px;
+          margin: 0 auto;
+          width: 100%;
         }
         .selection-panel {
           margin-top: 10px;
-        }
-        .selection-panel {
           max-height: 520px;
+        }
+        .showcase-section {
+          min-height: auto;
+        }
+        .featured-image-wrapper {
+          scroll-margin-top: 12px;
+        }
+        /* Quick switcher sits directly under the big preview on touch sizes */
+        .thumb-strip {
+          display: flex;
+          grid-column: 1 / -1;
+          gap: 10px;
+          overflow-x: auto;
+          padding: 2px 2px 8px;
+          scrollbar-width: none;
+        }
+        .thumb-strip::-webkit-scrollbar {
+          display: none;
+        }
+        .lib-grid {
+          grid-template-columns: repeat(2, 1fr);
         }
       }
 
@@ -687,20 +1454,164 @@
           width: 100%;
           justify-content: space-between;
         }
+
+        /* --- Shop view on phones --- */
         .showcase-body {
           grid-template-columns: 1fr;
         }
+        .showcase-section {
+          min-height: auto;
+        }
         .featured-image-wrapper {
-          height: 280px;
+          height: 260px;
         }
         .showcase-title {
           font-size: 26px;
+        }
+        .showcase-description {
+          max-width: 100%;
+        }
+        .thumb-chip {
+          width: 56px;
+          height: 56px;
         }
         .bottom-row {
           justify-content: center;
         }
         .genre-card-button {
           width: 100%;
+          flex-direction: row;
+          gap: 10px;
+          padding: 12px 16px;
+        }
+        /* Nav pills scroll sideways instead of overflowing small screens */
+        .nav-bar {
+          max-width: 100%;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .nav-bar::-webkit-scrollbar {
+          display: none;
+        }
+        .nav-links {
+          flex-wrap: nowrap;
+        }
+        .nav-item {
+          white-space: nowrap;
+          padding: 8px 14px;
+        }
+
+        /* --- Library mobile view: compact 2-column media grid --- */
+        .lib-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+        .lib-thumb {
+          height: 110px;
+        }
+        .lib-body {
+          padding: 10px 10px 12px;
+          gap: 7px;
+        }
+        .lib-title {
+          font-size: 12px;
+        }
+        .lib-avatar {
+          width: 18px;
+          height: 18px;
+        }
+        .lib-username {
+          font-size: 10px;
+        }
+        .lib-rating {
+          gap: 3px;
+          font-size: 10px;
+        }
+        .lib-rating svg {
+          width: 10px;
+          height: 10px;
+        }
+        .lib-rating span {
+          display: none; /* votes text hidden to keep small cards tidy */
+        }
+        .lib-stats {
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .lib-stat {
+          font-size: 10px;
+          gap: 4px;
+        }
+        .lib-cta {
+          padding: 8px 6px;
+          font-size: 10px;
+          letter-spacing: 0.8px;
+        }
+
+        /* Category chips become a swipeable row instead of wrapping tall */
+        .lib-chips {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          margin-bottom: 8px;
+          padding-bottom: 4px;
+          scrollbar-width: none;
+        }
+        .lib-chips::-webkit-scrollbar {
+          display: none;
+        }
+        .lib-chip {
+          flex: 0 0 auto;
+        }
+
+        .lib-section-title {
+          font-size: 20px;
+        }
+        .lib-section-count {
+          padding: 6px 12px;
+          font-size: 11px;
+        }
+        .lib-banner {
+          padding: 22px;
+          min-height: 160px;
+        }
+        .lib-slide-title {
+          font-size: 22px;
+        }
+        .lib-banner-dots {
+          left: 22px;
+          bottom: 12px;
+        }
+        .lib-toolbar {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 12px;
+        }
+        .lib-sort-btn {
+          padding: 7px 10px;
+        }
+
+        /* Lightbox becomes a bottom sheet that feels native on phones */
+        .lib-lightbox {
+          padding: 0;
+          align-items: flex-end;
+        }
+        .lib-lightbox-box {
+          max-width: 100%;
+          max-height: 92dvh;
+          border-radius: 22px 22px 0 0;
+          overflow-y: auto;
+        }
+        .lib-lightbox-media img,
+        .lib-lightbox-media video {
+          max-height: 48vh;
+        }
+        .lib-lightbox-close {
+          top: 12px;
+          right: 12px;
+          background: rgba(0, 0, 0, 0.55);
+        }
+        .lib-lightbox-info {
+          padding: 14px 16px 22px;
         }
       }
     </style>
@@ -721,50 +1632,51 @@
        MAIN CYBERPUNK APP CONTAINER
        ========================================================================== -->
     <div class="app-container">
-      <!-- LEFT SECTION: NAVIGATION & FEATURED SHOWCASE -->
-      <main class="showcase-section">
-        <!-- Top Navigation Header -->
-        <header class="top-header">
-          <div class="brand-logo">
-            <span class="brand-top">CYBERPUNK</span>
-            <span class="brand-bottom">GAMES</span>
-          </div>
+      <!-- Top Navigation Header (persistent — shared by every view) -->
+      <header class="top-header">
+        <div class="brand-logo">
+          <span class="brand-top">CYBERPUNK</span>
+          <span class="brand-bottom">GAMES</span>
+        </div>
 
-          <nav class="nav-bar">
-            <ul class="nav-links">
-              <li><a class="nav-item active" href="#shop">Shop</a></li>
-              <li><a class="nav-item" href="#community">Community</a></li>
-              <li><a class="nav-item" href="#library">Library</a></li>
-              <li><a class="nav-item" href="#news">News</a></li>
-              <!-- Reserved space for future nav links -->
-            </ul>
-          </nav>
+        <nav class="nav-bar">
+          <ul class="nav-links">
+            <li><a class="nav-item active" href="#shop">Shop</a></li>
+            <li><a class="nav-item" href="#community">Community</a></li>
+            <li><a class="nav-item" href="#library">Library</a></li>
+            <li><a class="nav-item" href="#news">News</a></li>
+            <!-- Reserved space for future nav links -->
+          </ul>
+        </nav>
 
-          <div class="header-user-status">
-            <div class="wallet-chip">
-              <svg class="wallet-icon" viewBox="0 0 24 24">
-                <path
-                  d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
-                />
-              </svg>
-              <span>$2,000.015</span>
-            </div>
-            <svg class="flag-icon" viewBox="0 0 640 480">
-              <path fill="#012169" d="M0 0h640v480H0z" />
+        <div class="header-user-status">
+          <div class="wallet-chip">
+            <svg class="wallet-icon" viewBox="0 0 24 24">
               <path
-                fill="#FFF"
-                d="m75 0 245 181L565 0h75v55L395 240l245 185v55h-75L320 299 75 480H0v-55l245-185L0 55V0h75z"
+                d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
               />
-              <path
-                fill="#C8102E"
-                d="m424 288 216 162v30h-40L376 318l48-30zM565 0l-221 165 24 35L640 20V0h-75zM0 425l216-162 24 35L16 480H0v-55zM192 192 0 48v-30h40l200 150-48 24z"
-              />
-              <path fill="#FFF" d="M240 0h160v480H240zM0 160h640v160H0z" />
-              <path fill="#C8102E" d="M267 0h106v480H267zM0 187h640v106H0z" />
             </svg>
+            <span>$2,000.015</span>
           </div>
-        </header>
+          <svg class="flag-icon" viewBox="0 0 640 480">
+            <path fill="#012169" d="M0 0h640v480H0z" />
+            <path
+              fill="#FFF"
+              d="m75 0 245 181L565 0h75v55L395 240l245 185v55h-75L320 299 75 480H0v-55l245-185L0 55V0h75z"
+            />
+            <path
+              fill="#C8102E"
+              d="m424 288 216 162v30h-40L376 318l48-30zM565 0l-221 165 24 35L640 20V0h-75zM0 425l216-162 24 35L16 480H0v-55zM192 192 0 48v-30h40l200 150-48 24z"
+            />
+            <path fill="#FFF" d="M240 0h160v480H240zM0 160h640v160H0z" />
+            <path fill="#C8102E" d="M267 0h106v480H267zM0 187h640v106H0z" />
+          </svg>
+        </div>
+      </header>
 
+      <!-- SHOP VIEW (original showcase layout) -->
+      <div class="shop-view" id="shopView">
+        <main class="showcase-section">
         <!-- Main Showcase Body -->
         <div class="showcase-body">
           <!-- Left Featured Image Container -->
@@ -776,6 +1688,13 @@
               alt="Featured Cyberpunk Character"
             />
           </div>
+
+          <!-- Mobile-only quick switcher strip (hidden on desktop, filled via JS) -->
+          <div
+            class="thumb-strip"
+            id="thumbStrip"
+            aria-label="Quick game switcher"
+          ></div>
 
           <!-- Right Content Details -->
           <div class="showcase-details">
@@ -862,7 +1781,96 @@
           </button>
         </div>
       </aside>
+      </div>
+      <!-- closes .shop-view -->
+
+      <!-- ==========================================================================
+         LIBRARY VIEW — VIDEO / GIF SHOWCASE GRID
+         ========================================================================== -->
+      <section class="library-view" id="libraryView">
+        <!-- Hero Banner Carousel -->
+        <div class="lib-banner" id="libBanner">
+          <div id="libBannerSlides"></div>
+          <div class="lib-banner-dots" id="libBannerDots"></div>
+        </div>
+
+        <!-- Section Header -->
+        <div class="lib-section-header">
+          <div class="lib-section-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"
+              />
+            </svg>
+          </div>
+          <h2 class="lib-section-title">Library</h2>
+          <span class="lib-section-count"><b id="libCount">0</b> VIDEOS</span>
+        </div>
+
+        <!-- Filter Chips (categories + special filters) -->
+        <div class="lib-chips" id="libCatChips"></div>
+        <div class="lib-chips" id="libSpecialChips"></div>
+
+        <!-- Sort / Filter Toolbar -->
+        <div class="lib-toolbar">
+          <div class="lib-toolbar-left">
+            <span class="lib-toolbar-heading" id="libGridHeading"
+              >All Videos</span
+            >
+            <button class="lib-sort-chip" id="libSortChip" type="button">
+              ⚡ <span id="libSortLabel">Sorting by Popularity</span>
+            </button>
+          </div>
+          <div class="lib-toolbar-right">
+            <span class="lib-sort-label">Sort by:</span>
+            <button
+              class="lib-sort-btn active"
+              data-sort="popularity"
+              type="button"
+            >
+              Popularity
+            </button>
+            <button class="lib-sort-btn" data-sort="rate" type="button">
+              Rate
+            </button>
+            <button class="lib-sort-btn" data-sort="price" type="button">
+              Price
+            </button>
+            <button class="lib-sort-btn" data-sort="alphabet" type="button">
+              Alphabet
+            </button>
+            <button class="lib-filter-btn" id="libFilterBtn" type="button">
+              <svg viewBox="0 0 24 24">
+                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+              </svg>
+              <span>Filter</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Media Card Grid (populated dynamically via JS) -->
+        <div class="lib-grid" id="libGrid"></div>
+        <div class="lib-empty" id="libEmpty">NO VIDEOS MATCH YOUR FILTERS</div>
+      </section>
     </div>
+
+    <!-- Library Media Lightbox -->
+    <div class="lib-lightbox" id="libLightbox">
+      <button
+        class="lib-lightbox-close"
+        id="libLightboxClose"
+        aria-label="Close"
+      >
+        ✕
+      </button>
+      <div class="lib-lightbox-box">
+        <div class="lib-lightbox-media" id="libLightboxMedia"></div>
+        <div class="lib-lightbox-info" id="libLightboxInfo"></div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="lib-toast" id="libToast"></div>
 
     <!-- ==========================================================================
        JAVASCRIPT LOGIC
@@ -874,26 +1882,57 @@
          ========================================================================== */
         // Inline Data-URIs (SVG Animations) so the code works out-of-the-box without external images.
         // You can replace these strings with real file paths: e.g. "assets/gifs/loading1.gif"
-        const preloadGifs = [
-          "img/1.gif",
-          "img/2.gif",
-          "img/3.gif",
-          "img/4.gif",
-        ];
+        // Only gifs that actually exist in the img/ folder
+        const preloadGifs = ["img/1.gif", "img/2.gif"];
 
         function initPreloader() {
           const preloaderEl = document.getElementById("preloader");
           const preloaderGifEl = document.getElementById("preloaderGif");
 
+          const MIN_DISPLAY_MS = 1200; // keep the loader on screen at least this long
+          const MAX_DISPLAY_MS = 4000; // safety net: never block the page on a stalled gif
+
+          const startedAt = Date.now();
+          let hidden = false;
+          const hidePreloader = () => {
+            if (hidden) return;
+            hidden = true;
+            preloaderEl.classList.add("fade-out");
+          };
+
           // Pick a random GIF from the array
           const randomGif =
             preloadGifs[Math.floor(Math.random() * preloadGifs.length)];
+
+          // Only fade out once the gif has actually finished downloading,
+          // otherwise the animation gets cut off before it is ever seen.
+          preloaderGifEl.addEventListener(
+            "load",
+            () => {
+              const remaining = MIN_DISPLAY_MS - (Date.now() - startedAt);
+              setTimeout(hidePreloader, Math.max(0, remaining));
+            },
+            { once: true },
+          );
+          preloaderGifEl.addEventListener(
+            "error",
+            () => {
+              // Missing/broken file: hide the empty box and fade out anyway.
+              preloaderGifEl.style.display = "none";
+              hidePreloader();
+            },
+            { once: true },
+          );
+
           preloaderGifEl.src = randomGif;
 
-          // Hide preloader smoothly after page loads
-          setTimeout(() => {
-            preloaderEl.classList.add("fade-out");
-          }, 800);
+          // Warm the cache for both gifs (the other one may appear in the Library)
+          preloadGifs.forEach((src) => {
+            const warm = new Image();
+            warm.src = src;
+          });
+
+          setTimeout(hidePreloader, MAX_DISPLAY_MS);
         }
 
         /* ==========================================================================
@@ -1022,8 +2061,17 @@
         const avatar1 = document.getElementById("avatar1");
         const avatar2 = document.getElementById("avatar2");
         const avatar3 = document.getElementById("avatar3");
+        const thumbStrip = document.getElementById("thumbStrip");
+        const featuredWrapper =
+          document.querySelector(".featured-image-wrapper");
+        const isMobileLayout = () =>
+          window.matchMedia("(max-width: 992px)").matches;
 
         function renderGallery() {
+          // Rebuilding the cards can yank the panel scroll back to the top —
+          // remember where the user was and restore it afterwards.
+          const prevPanelScroll = selectionPanel.scrollTop;
+
           galleryContainer.innerHTML = "";
 
           gamesData.forEach((game, index) => {
@@ -1052,7 +2100,28 @@
           });
 
           updateSelectionCount();
+          renderThumbStrip();
+          selectionPanel.scrollTop = prevPanelScroll;
         }
+
+        function renderThumbStrip() {
+          thumbStrip.innerHTML = gamesData
+            .map(
+              (game) => `
+              <button class="thumb-chip ${game.id === selectedGameId ? "selected" : ""}"
+                      data-id="${game.id}" type="button"
+                      style="background-image: url('${game.image}')"
+                      aria-label="Show ${game.title}"></button>`,
+            )
+            .join("");
+        }
+
+        thumbStrip.addEventListener("click", (e) => {
+          const chip = e.target.closest("[data-id]");
+          if (!chip) return;
+          const game = gamesData.find((g) => g.id === Number(chip.dataset.id));
+          if (game) selectGame(game);
+        });
 
         function selectGame(game) {
           if (selectedGameId === game.id) return;
@@ -1068,6 +2137,22 @@
 
           // Update card selection states
           renderGallery();
+
+          // On phone/tablet the gallery panel sits below the big preview, so
+          // bring the preview back into view to make the swap visible.
+          if (isMobileLayout()) {
+            const rect = featuredWrapper.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight * 0.55) {
+              setTimeout(
+                () =>
+                  featuredWrapper.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  }),
+                250,
+              );
+            }
+          }
         }
 
         function updateSelectionCount() {
@@ -1179,11 +2264,561 @@
         themeRandomizerBtn.addEventListener("click", applyRandomTheme);
 
         /* ==========================================================================
+         6. NAVIGATION VIEW SWITCHING (SHOP <-> LIBRARY)
+         ========================================================================== */
+        const shopView = document.getElementById("shopView");
+        const libraryView = document.getElementById("libraryView");
+        const navItems = document.querySelectorAll(".nav-item");
+
+        navItems.forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.preventDefault();
+            const label = item.textContent.trim();
+
+            if (label === "Shop" || label === "Library") {
+              navItems.forEach((n) => n.classList.toggle("active", n === item));
+              shopView.classList.toggle("hidden", label !== "Shop");
+              libraryView.classList.toggle("active", label === "Library");
+            } else {
+              showToast(`${label.toUpperCase()} SECTION COMING SOON...`);
+            }
+          });
+        });
+
+        /* ==========================================================================
+         7. LIBRARY VIEW — VIDEO / GIF MEDIA GRID
+         ========================================================================== */
+        /*
+         HOW TO ADD YOUR OWN MEDIA:
+         Each card only needs a `src` value — drop in ANY video, gif or image
+         path and the renderer auto-detects the type from the file extension:
+           .mp4 .webm .ogv .mov .m4v  -> autoplay muted looping <video>
+           .gif                       -> animated <img>
+           .png .jpg .jpeg ...        -> static <img>
+        */
+        const libraryData = [
+          {
+            id: 101,
+            title: "NEON DRIFT PROTOCOL",
+            category: "Cyberpunk",
+            creator: "NightCityKid",
+            avatar: "img/1.jpeg",
+            rating: 9.2,
+            votes: "1,204",
+            online: "1,858",
+            visits: "12.4M",
+            price: 4.99,
+            badge: "hot",
+            src: "img/3.mp4",
+          },
+          {
+            id: 102,
+            title: "MECHA GAUNTLET",
+            category: "Action",
+            creator: "TitanForge",
+            avatar: "img/2.jpeg",
+            rating: 8.7,
+            votes: "861",
+            online: "934",
+            visits: "8.1M",
+            price: 0,
+            badge: "love",
+            src: "img/4.mp4",
+          },
+          {
+            id: 103,
+            title: "SHADOW SHINOBI",
+            category: "Adventure",
+            creator: "KageLabs",
+            avatar: "img/23a0c32c-61bd-43b6-9b81-9afee4d0e9ac.jpeg",
+            rating: 9.0,
+            votes: "2,015",
+            online: "2,241",
+            visits: "21M",
+            price: 2.49,
+            badge: "hot",
+            src: "img/1.gif",
+          },
+          {
+            id: 104,
+            title: "CYBER HUNTER ARENA",
+            category: "Battle Royale",
+            creator: "GhostWire",
+            avatar: "img/3.jpg",
+            rating: 8.4,
+            votes: "512",
+            online: "677",
+            visits: "5.6M",
+            price: 0,
+            badge: null,
+            src: "img/2.gif",
+          },
+          {
+            id: 105,
+            title: "ANBU WARS",
+            category: "Cyberpunk",
+            creator: "Ubisoft Montreal",
+            avatar: "img/4.jpg",
+            rating: 8.9,
+            votes: "1,733",
+            online: "1,102",
+            visits: "14M",
+            price: 9.99,
+            badge: null,
+            src: "img/0.png",
+          },
+          {
+            id: 106,
+            title: "TITAN ASSAULT",
+            category: "Strategy",
+            creator: "EA Sports",
+            avatar: "img/1.jpeg",
+            rating: 8.1,
+            votes: "433",
+            online: "402",
+            visits: "3.2M",
+            price: 0,
+            badge: "hot",
+            src: "img/1.png",
+          },
+          {
+            id: 107,
+            title: "NARUTO LEGENDS",
+            category: "Adventure",
+            creator: "Bandai Namco",
+            avatar: "img/2.jpeg",
+            rating: 9.4,
+            votes: "3,118",
+            online: "3,540",
+            visits: "28M",
+            price: 14.99,
+            badge: "love",
+            src: "img/2.png",
+          },
+          {
+            id: 108,
+            title: "NEON CITY RACERS",
+            category: "Racing",
+            creator: "Codemasters",
+            avatar: "img/23a0c32c-61bd-43b6-9b81-9afee4d0e9ac.jpeg",
+            rating: 8.6,
+            votes: "908",
+            online: "812",
+            visits: "6.9M",
+            price: 5.99,
+            badge: null,
+            src: "img/4.png",
+          },
+          {
+            id: 109,
+            title: "MECH WARRIORS",
+            category: "Strategy",
+            creator: "Paradox Interactive",
+            avatar: "img/3.jpg",
+            rating: 8.0,
+            votes: "350",
+            online: "291",
+            visits: "2.4M",
+            price: 0,
+            badge: null,
+            src: "img/5.png",
+          },
+          {
+            id: 110,
+            title: "GHOST PROTOCOL",
+            category: "Stealth",
+            creator: "Rockstar Games",
+            avatar: "img/4.jpg",
+            rating: 8.8,
+            votes: "1,046",
+            online: "989",
+            visits: "9.3M",
+            price: 7.49,
+            badge: null,
+            src: "img/6.png",
+          },
+          {
+            id: 111,
+            title: "CYBERPUNK LEGENDS",
+            category: "Cyberpunk",
+            creator: "Bethesda Softworks",
+            avatar: "img/1.jpeg",
+            rating: 9.1,
+            votes: "2,671",
+            online: "2,988",
+            visits: "19M",
+            price: 12.99,
+            badge: "hot",
+            src: "img/7.png",
+          },
+          {
+            id: 112,
+            title: "VIRTUAL NINJA",
+            category: "RPG",
+            creator: "Square Enix",
+            avatar: "img/2.jpeg",
+            rating: 8.3,
+            votes: "674",
+            online: "556",
+            visits: "4.1M",
+            price: 0,
+            badge: null,
+            src: "img/2.jpg",
+          },
+        ];
+
+        const VIDEO_EXT = /\.(mp4|webm|ogv|ogg|mov|m4v)$/i;
+        const isVideoSrc = (src) => VIDEO_EXT.test(src);
+        const mediaKind = (src) =>
+          isVideoSrc(src) ? "VIDEO" : /\.gif$/i.test(src) ? "GIF" : "IMG";
+
+        let activeCategory = "All";
+        let activeSpecial = null;
+        let activeSort = "popularity";
+        let badgeFilterOn = false;
+        let bannerIndex = 0;
+
+        const libGrid = document.getElementById("libGrid");
+        const libEmpty = document.getElementById("libEmpty");
+        const libCount = document.getElementById("libCount");
+        const libGridHeading = document.getElementById("libGridHeading");
+        const libSortChip = document.getElementById("libSortChip");
+        const libSortLabel = document.getElementById("libSortLabel");
+        const catChipsEl = document.getElementById("libCatChips");
+        const specialChipsEl = document.getElementById("libSpecialChips");
+        const sortBtns = document.querySelectorAll(".lib-sort-btn");
+        const filterBtn = document.getElementById("libFilterBtn");
+        const bannerSlidesEl = document.getElementById("libBannerSlides");
+        const bannerDotsEl = document.getElementById("libBannerDots");
+        const lightbox = document.getElementById("libLightbox");
+        const lightboxMedia = document.getElementById("libLightboxMedia");
+        const lightboxInfo = document.getElementById("libLightboxInfo");
+        const toastEl = document.getElementById("libToast");
+
+        const STAR_SVG =
+          '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+
+        const specialFilters = [
+          { id: "animated", label: "🎬 Videos & GIFs" },
+          { id: "hot", label: "🔥 Hot" },
+          { id: "love", label: "⭐ Creators Love" },
+          { id: "free", label: "🆓 Free" },
+        ];
+
+        const sortModes = {
+          popularity: "Popularity",
+          rate: "Rate",
+          price: "Price",
+          alphabet: "Alphabet",
+        };
+
+        const bannerSlides = [
+          {
+            tag: "FEATURED STREAM",
+            title: "NEON DRIFT PROTOCOL",
+            sub: "The Season 3 cinematic trailer is live in your library. Strap in and hit play.",
+            cta: "WATCH TRAILER",
+            action: () => openLightbox(libraryData[0]),
+          },
+          {
+            tag: "CREATOR DROP",
+            title: "DOUBLE XP WEEKEND",
+            sub: "Every match earns twice the credits until Sunday midnight. No strings attached.",
+            cta: "CLAIM BONUS",
+            action: () => showToast("✦ BONUS ACTIVATED — 2X CREDITS ENABLED"),
+          },
+          {
+            tag: "NEW ADDITION",
+            title: "MECHA GAUNTLET ARRIVES",
+            sub: "Heavy-metal arena combat just dropped. Free for every library member.",
+            cta: "VIEW GAME",
+            action: () => openLightbox(libraryData[1]),
+          },
+        ];
+
+        function getVisibleLibraryItems() {
+          let list = [...libraryData];
+
+          if (activeCategory !== "All")
+            list = list.filter((i) => i.category === activeCategory);
+
+          if (activeSpecial === "animated")
+            list = list.filter(
+              (i) => isVideoSrc(i.src) || /\.gif$/i.test(i.src),
+            );
+          if (activeSpecial === "hot")
+            list = list.filter((i) => i.badge === "hot");
+          if (activeSpecial === "love")
+            list = list.filter((i) => i.badge === "love");
+          if (activeSpecial === "free") list = list.filter((i) => !i.price);
+
+          if (badgeFilterOn) list = list.filter((i) => i.badge);
+
+          const onlineNum = (v) =>
+            parseFloat(String(v).replace(/[^0-9.]/g, "")) || 0;
+
+          switch (activeSort) {
+            case "rate":
+              list.sort((a, b) => b.rating - a.rating);
+              break;
+            case "price":
+              list.sort((a, b) => (a.price || 0) - (b.price || 0));
+              break;
+            case "alphabet":
+              list.sort((a, b) => a.title.localeCompare(b.title));
+              break;
+            default:
+              list.sort((a, b) => onlineNum(b.online) - onlineNum(a.online));
+          }
+
+          return list;
+        }
+
+        function libraryCardTemplate(item) {
+          const kind = mediaKind(item.src);
+          const media = isVideoSrc(item.src)
+            ? `<video class="lib-media" src="${item.src}" autoplay muted loop playsinline></video>`
+            : `<img class="lib-media" src="${item.src}" alt="${item.title}" loading="lazy" />`;
+
+          const badges = [
+            item.badge === "hot"
+              ? '<span class="lib-badge hot">🔥 Hot</span>'
+              : "",
+            item.badge === "love"
+              ? '<span class="lib-badge love">Creators Love</span>'
+              : "",
+          ].join("");
+
+          const playIcon =
+            kind === "VIDEO"
+              ? '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
+              : "";
+
+          return `
+            <article class="lib-card" data-id="${item.id}">
+              <div class="lib-thumb">
+                ${media}
+                <div class="lib-badges">${badges}</div>
+                <span class="lib-type-chip">${playIcon}${kind}</span>
+              </div>
+              <div class="lib-body">
+                <h3 class="lib-title">${item.title}</h3>
+                <div class="lib-creator">
+                  <img class="lib-avatar" src="${item.avatar}" alt="" loading="lazy" />
+                  <span class="lib-username">@${item.creator}</span>
+                  <span class="lib-rating">${STAR_SVG}${item.rating.toFixed(1)}<span>· ${item.votes} votes</span></span>
+                </div>
+                <div class="lib-stats">
+                  <div class="lib-stat"><span class="lib-dot-online"></span>Online&nbsp;<b>${item.online}</b></div>
+                  <div class="lib-stat"><span class="lib-dot-visits"></span>Visits&nbsp;<b>${item.visits}</b></div>
+                </div>
+                <button class="lib-cta" type="button">▶ Watch Now</button>
+              </div>
+            </article>`;
+        }
+
+        function renderLibrary() {
+          const list = getVisibleLibraryItems();
+          libGrid.innerHTML = list.map(libraryCardTemplate).join("");
+          libEmpty.classList.toggle("visible", list.length === 0);
+          libCount.textContent = list.length;
+
+          const special = specialFilters.find((s) => s.id === activeSpecial);
+          libGridHeading.textContent = special
+            ? special.label
+            : activeCategory === "All"
+              ? "All Videos"
+              : activeCategory;
+        }
+
+        function renderChips() {
+          const categories = [
+            "All",
+            ...new Set(libraryData.map((i) => i.category)),
+          ];
+          catChipsEl.innerHTML = categories
+            .map(
+              (c) =>
+                `<button class="lib-chip ${c === activeCategory ? "active" : ""}" data-cat="${c}" type="button">${c}</button>`,
+            )
+            .join("");
+
+          specialChipsEl.innerHTML = specialFilters
+            .map(
+              (s) =>
+                `<button class="lib-chip ${s.id === activeSpecial ? "active" : ""}" data-special="${s.id}" type="button">${s.label}</button>`,
+            )
+            .join("");
+        }
+
+        function updateSortUI() {
+          libSortLabel.textContent = `Sorting by ${sortModes[activeSort]}`;
+          sortBtns.forEach((b) =>
+            b.classList.toggle("active", b.dataset.sort === activeSort),
+          );
+        }
+
+        function renderBanner() {
+          bannerSlidesEl.innerHTML = bannerSlides
+            .map(
+              (s, i) => `
+              <div class="lib-slide ${i === bannerIndex ? "active" : ""}">
+                <span class="lib-slide-tag">${s.tag}</span>
+                <h2 class="lib-slide-title">${s.title}</h2>
+                <p class="lib-slide-sub">${s.sub}</p>
+                <button class="lib-slide-cta" data-slide="${i}" type="button">${s.cta}</button>
+              </div>`,
+            )
+            .join("");
+
+          bannerDotsEl.innerHTML = bannerSlides
+            .map(
+              (_, i) =>
+                `<button class="lib-dot ${i === bannerIndex ? "active" : ""}" data-dot="${i}" aria-label="Banner slide ${i + 1}"></button>`,
+            )
+            .join("");
+        }
+
+        function openLightbox(item) {
+          const media = isVideoSrc(item.src)
+            ? `<video src="${item.src}" controls autoplay muted loop playsinline></video>`
+            : `<img src="${item.src}" alt="${item.title}" />`;
+
+          lightboxMedia.innerHTML = media;
+          lightboxInfo.innerHTML = `
+            <div>
+              <div class="lib-lightbox-title">${item.title}</div>
+              <div class="lib-creator" style="margin-top: 8px;">
+                <img class="lib-avatar" src="${item.avatar}" alt="" />
+                <span class="lib-username">@${item.creator}</span>
+                <span class="lib-rating">${STAR_SVG}${item.rating.toFixed(1)}<span>· ${item.votes} votes</span></span>
+                <span class="lib-chip active" style="cursor: default;">${item.category}</span>
+                <span class="lib-chip" style="cursor: default;">${item.price ? `$${item.price.toFixed(2)}` : "FREE"}</span>
+              </div>
+            </div>`;
+          lightbox.classList.add("open");
+        }
+
+        function closeLightbox() {
+          lightbox.classList.remove("open");
+          lightboxMedia.innerHTML = "";
+        }
+
+        let toastTimer;
+        function showToast(message) {
+          toastEl.textContent = message;
+          toastEl.classList.add("visible");
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(
+            () => toastEl.classList.remove("visible"),
+            2200,
+          );
+        }
+
+        function initLibrary() {
+          renderChips();
+          renderBanner();
+          updateSortUI();
+          renderLibrary();
+
+          // Category chips (clicking a category clears the special filter)
+          catChipsEl.addEventListener("click", (e) => {
+            const chip = e.target.closest("[data-cat]");
+            if (!chip) return;
+            activeCategory = chip.dataset.cat;
+            activeSpecial = null;
+            renderChips();
+            renderLibrary();
+          });
+
+          // Special filter chips (click again to toggle off)
+          specialChipsEl.addEventListener("click", (e) => {
+            const chip = e.target.closest("[data-special]");
+            if (!chip) return;
+            activeSpecial =
+              activeSpecial === chip.dataset.special
+                ? null
+                : chip.dataset.special;
+            renderChips();
+            renderLibrary();
+          });
+
+          // Sorting buttons + cycling sort chip
+          sortBtns.forEach((btn) =>
+            btn.addEventListener("click", () => {
+              activeSort = btn.dataset.sort;
+              updateSortUI();
+              renderLibrary();
+            }),
+          );
+
+          libSortChip.addEventListener("click", () => {
+            const modes = Object.keys(sortModes);
+            activeSort = modes[(modes.indexOf(activeSort) + 1) % modes.length];
+            updateSortUI();
+            renderLibrary();
+          });
+
+          // Badge-only filter toggle
+          filterBtn.addEventListener("click", () => {
+            badgeFilterOn = !badgeFilterOn;
+            filterBtn.classList.toggle("active", badgeFilterOn);
+            filterBtn.querySelector("span").textContent = badgeFilterOn
+              ? "Filter: On"
+              : "Filter";
+            renderLibrary();
+          });
+
+          // Banner CTA buttons + dots
+          document.getElementById("libBanner").addEventListener("click", (e) => {
+            const cta = e.target.closest("[data-slide]");
+            if (cta) {
+              bannerSlides[Number(cta.dataset.slide)].action();
+              return;
+            }
+            const dot = e.target.closest("[data-dot]");
+            if (dot) {
+              bannerIndex = Number(dot.dataset.dot);
+              renderBanner();
+            }
+          });
+
+          // Banner auto-rotation (only while the library view is visible)
+          setInterval(() => {
+            if (!libraryView.classList.contains("active")) return;
+            bannerIndex = (bannerIndex + 1) % bannerSlides.length;
+            renderBanner();
+          }, 6000);
+
+          // Open media in lightbox when a card is clicked
+          libGrid.addEventListener("click", (e) => {
+            const card = e.target.closest(".lib-card");
+            if (!card) return;
+            const item = libraryData.find(
+              (g) => g.id === Number(card.dataset.id),
+            );
+            if (item) openLightbox(item);
+          });
+
+          // Lightbox close controls
+          document
+            .getElementById("libLightboxClose")
+            .addEventListener("click", closeLightbox);
+          lightbox.addEventListener("click", (e) => {
+            if (e.target === lightbox) closeLightbox();
+          });
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeLightbox();
+          });
+        }
+
+        /* ==========================================================================
          INITIALIZATION
          ========================================================================== */
         initPreloader();
         initShowcaseImages();
         renderGallery();
+        initLibrary();
       });
     </script>
   </body>
